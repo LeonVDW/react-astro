@@ -1,7 +1,7 @@
-import ExampleComponent from './'
+import AstroStateProvider from './'
 
-describe('ExampleComponent', () => {
+describe('AstroStateProvider', () => {
   it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+    expect(AstroStateProvider).toBeTruthy()
   })
 })

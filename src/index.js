@@ -1,22 +1,56 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import React from 'react';
+import { EventEmitter } from 'events';
 
-import styles from './styles.css'
+const stateEmitter = new EventEmitter();
+stateEmitter.setMaxListeners(0);
 
-export default class ExampleComponent extends Component {
-  static propTypes = {
-    text: PropTypes.string
-  }
+export let globalState = {};
 
-  render() {
-    const {
-      text
-    } = this.props
+export function addGlobalState(stateObj) {
+	globalState = { ...globalState, ...stateObj };
+}
 
-    return (
-      <div className={styles.test}>
-        Example Component: {text}
-      </div>
-    )
-  }
+export const setGlobalState = newState => {
+	try {
+		for (var key in newState) {
+			globalState[key] = newState[key];
+			stateEmitter.emit(`astroUpdate:${key}`);
+		}
+		stateEmitter.emit('astroUpdateState');
+	} catch (error) {
+		console.log('setGlobalStateError: ', error);
+	}
+};
+
+export default function AstroStateProvider(WrappedComponent, keys = []) {
+	return class extends React.Component {
+		componentDidMount() {
+			if (keys.length > 0) {
+				for (const key of keys) {
+					stateEmitter.on(`astroUpdate:${key}`, () => {
+						this.forceUpdate();
+					});
+				}
+			} else {
+				stateEmitter.on('astroUpdateState', () => {
+					this.forceUpdate();
+				});
+			}
+		}
+
+		render() {
+			let stateToReturn = {};
+			if (keys.length > 0) {
+				for (const key in globalState) {
+					if (keys.includes(key)) {
+						stateToReturn[key] = globalState[key];
+					}
+				}
+			} else {
+				stateToReturn = globalState;
+			}
+
+			return <WrappedComponent {...this.props} astro={stateToReturn} />;
+		}
+	};
 }
