@@ -1,6 +1,6 @@
 {
   "name": "react-astro",
-  "version": "0.1.12",
+  "version": "0.1.16",
   "description": "A simple cross-component state management tool for react. Does not make use of reducers or action methods. Avoids component drilling",
   "author": "LeonVDW",
   "license": "MIT",
